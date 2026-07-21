@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator podestów scenicznych</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111214">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Podesty">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#111214;
+    --panel:#1a1c1f;
+    --panel-2:#212327;
+    --panel-3:#26292d;
+    --line:#33363b;
+    --line-strong:#46494f;
+    --text:#ECEAE4;
+    --text-dim:#9a9da3;
+    --text-mute:#6b6e74;
+    --amber:#F2A93B;
+    --red:#E4483A;
+    --red-dim:#7a2620;
+    --blue:#4FA8D8;
+    --ok:#7BC67E;
+    --font-display:'Oswald', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.5;
+    padding:0 0 60px;
+  }
+  .stage-strip{
+    height:6px;
+    width:100%;
+    background:repeating-linear-gradient(90deg, var(--amber) 0 24px, #000 24px 48px);
+    opacity:.85;
+  }
+  header{
+    padding:38px 24px 24px;
+    max-width:1220px;
+    margin:0 auto;
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:clamp(28px,4vw,42px);
+    letter-spacing:.01em;
+    margin:0 0 10px;
+    text-transform:uppercase;
+  }
+  .sub{
+    color:var(--text-dim);
+    max-width:680px;
+    font-size:15px;
+    margin:0;
+  }
+  main{
+    max-width:1220px;
+    margin:0 auto;
+    padding:32px 24px 0;
+    display:grid;
+    grid-template-columns:360px 1fr;
+    gap:24px;
+    align-items:start;
+  }
+  @media (max-width:900px){
+    main{grid-template-columns:1fr;}
+  }
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:20px;
+  }
+  .panel h2{
+    font-family:var(--font-display);
+    font-size:14px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:0 0 16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .panel h2::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--line-strong);
+  }
+  label{
+    display:block;
+    font-size:12px;
+    color:var(--text-dim);
+    margin-bottom:6px;
+    margin-top:14px;
+  }
+  label:first-of-type{margin-top:0;}
+  input[type=number], input[type=text], select{
+    width:100%;
+    background:var(--panel-2);
+    border:1px solid var(--line-strong);
+    color:var(--text);
+    font-family:var(--font-mono);
+    font-size:15px;
+    padding:9px 11px;
+    border-radius:3px;
+  }
+  input[type=text]{font-family:var(--font-body); font-size:14px;}
+  input:focus, select:focus{
+    outline:none;
+    border-color:var(--amber);
+  }
+  select{
+    font-family:var(--font-body);
+    font-size:13px;
+  }
+  .hint{
+    font-size:11px;
+    color:var(--text-mute);
+    margin-top:6px;
+    line-height:1.45;
+  }
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .toggle-row{
+    display:flex;
+    gap:8px;
+    margin-top:8px;
+  }
+  .toggle-row button{
+    flex:1;
+    background:var(--panel-2);
+    border:1px solid var(--line-strong);
+    color:var(--text-dim);
+    font-family:var(--font-body);
+    font-size:12px;
+    padding:8px 6px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .toggle-row button.active{
+    border-color:var(--amber);
+    color:var(--amber);
+    background:#2a2410;
+  }
+  .stock-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .stock-row input{width:100px;}
+  .stock-row span{font-size:12.5px; color:var(--text-dim);}
+
+  .status{
+    margin-top:16px;
+    padding:12px 14px;
+    border-radius:3px;
+    font-size:13px;
+    font-family:var(--font-mono);
+    border:1px solid transparent;
+  }
+  .status.ok{background:#12261a; border-color:#2c5a3a; color:var(--ok);}
+  .status.bad{background:#2b1414; border-color:var(--red-dim); color:#ff8f85;}
+  .status.err{background:#2b1414; border-color:var(--red-dim); color:#ff8f85;}
+
+  .sections{display:flex; flex-direction:column; gap:14px; margin-top:14px;}
+  .section-card{
+    background:var(--panel-2);
+    border:1px solid var(--line-strong);
+    border-left:3px solid var(--amber);
+    border-radius:3px;
+    padding:14px 14px 16px;
+  }
+  .section-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:2px;
+  }
+  .section-head input[type=text]{
+    background:transparent;
+    border:none;
+    padding:2px 0;
+    font-size:13px;
+    font-weight:600;
+    color:var(--text);
+  }
+  .section-head input[type=text]:focus{border-bottom:1px solid var(--amber);}
+  .remove-btn{
+    background:none;
+    border:none;
+    color:var(--text-mute);
+    cursor:pointer;
+    font-size:12px;
+    font-family:var(--font-mono);
+    padding:2px 6px;
+  }
+  .remove-btn:hover{color:var(--red);}
+  .mode-toggle{display:flex; gap:6px; margin:8px 0 4px;}
+  .mode-toggle button{
+    flex:1;
+    background:var(--panel-3);
+    border:1px solid var(--line-strong);
+    color:var(--text-dim);
+    font-size:11px;
+    padding:6px 4px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .mode-toggle button.active{
+    border-color:var(--blue);
+    color:var(--blue);
+    background:#132531;
+  }
+  .fields-meters, .fields-units{margin-top:4px;}
+  .section-mini-result{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:1px solid var(--line);
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    color:var(--text-dim);
+    display:flex;
+    flex-wrap:wrap;
+    gap:4px 14px;
+  }
+  .section-mini-result b{color:var(--text); font-weight:600;}
+  .section-error{color:#ff8f85; font-size:11.5px; margin-top:8px; font-family:var(--font-mono);}
+
+  .add-btn{
+    width:100%;
+    margin-top:2px;
+    background:var(--panel-2);
+    border:1px dashed var(--line-strong);
+    color:var(--text-dim);
+    font-family:var(--font-body);
+    font-size:13px;
+    padding:11px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .add-btn:hover{border-color:var(--amber); color:var(--amber);}
+
+  .results{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-bottom:22px;
+  }
+  @media (max-width:700px){ .results{grid-template-columns:repeat(2,1fr);} }
+  .card{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-left:3px solid var(--amber);
+    border-radius:3px;
+    padding:16px;
+  }
+  .card.legs{border-left-color:var(--blue);}
+  .card.clamps{border-left-color:var(--red);}
+  .card .label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--text-dim);
+    margin-bottom:8px;
+  }
+  .card .value{
+    font-family:var(--font-mono);
+    font-size:28px;
+    font-weight:600;
+    color:var(--text);
+  }
+  .card .formula{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--text-mute);
+    margin-top:6px;
+  }
+
+  .breakdown{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:4px 16px;
+    margin-bottom:22px;
+    overflow-x:auto;
+  }
+  .breakdown table{width:100%; border-collapse:collapse; font-size:12.5px; min-width:560px;}
+  .breakdown th{
+    text-align:left;
+    padding:10px 8px;
+    color:var(--text-mute);
+    font-weight:500;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    border-bottom:1px solid var(--line-strong);
+  }
+  .breakdown td{padding:9px 8px; border-bottom:1px solid var(--line);}
+  .breakdown tr:last-child td{border-bottom:none;}
+  .breakdown td.num, .breakdown th.num{text-align:right; font-family:var(--font-mono);}
+  .breakdown tr.total td{font-weight:600; color:var(--amber); border-top:1px solid var(--line-strong);}
+
+  .legend{
+    display:flex;
+    gap:22px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+    font-size:12px;
+    color:var(--text-dim);
+  }
+  .legend span{display:flex; align-items:center; gap:7px;}
+  .swatch{width:12px; height:12px; border-radius:2px; display:inline-block;}
+
+  .preview-wrap{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:18px;
+    overflow-x:auto;
+  }
+  .preview-note{
+    font-size:12px;
+    color:var(--text-mute);
+    margin-top:10px;
+  }
+  footer{
+    max-width:1220px;
+    margin:30px auto 0;
+    padding:0 24px;
+    color:var(--text-mute);
+    font-size:12px;
+  }
+</style>
+</head>
+<body>
+<div class="stage-strip"></div>
+<header>
+  <p class="eyebrow">Rider techniczny / konstrukcja podestów</p>
+  <h1>Kalkulator podestów scenicznych</h1>
+  <p class="sub">Podaj sekcje sceny zbudowane z podestów 2 m × 1 m — w metrach albo od razu w sztukach po szerokości i głębokości. Dodaj kilka sekcji, jeśli między blokami podestów mają być przerwy (np. przejście) — każda sekcja liczona jest niezależnie.</p>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>Magazyn</h2>
+    <div class="stock-row">
+      <input type="number" id="stock" value="60" min="0" step="1">
+      <span>szt. podestów w magazynie</span>
+    </div>
+
+    <h2 style="margin-top:22px;">Sekcje sceny</h2>
+    <div class="sections" id="sections"></div>
+    <button class="add-btn" id="addSection">+ Dodaj sekcję (np. po przerwie)</button>
+
+    <div id="status" class="status ok">OK</div>
+  </section>
+
+  <section>
+    <div class="results">
+      <div class="card">
+        <div class="label">Podesty razem</div>
+        <div class="value" id="outN">0</div>
+        <div class="formula">suma z sekcji</div>
+      </div>
+      <div class="card legs">
+        <div class="label">Nóżki</div>
+        <div class="value" id="outLegs">0</div>
+        <div class="formula">4 × N</div>
+      </div>
+      <div class="card">
+        <div class="label">Łączniki razem</div>
+        <div class="value" id="outConnTotal">0</div>
+        <div class="formula">krótkie + długie</div>
+      </div>
+      <div class="card clamps">
+        <div class="label">Klamry</div>
+        <div class="value" id="outClamps">0</div>
+        <div class="formula">tylko na obrzeżu</div>
+      </div>
+    </div>
+
+    <div class="breakdown">
+      <table>
+        <thead>
+          <tr>
+            <th>Sekcja</th>
+            <th class="num">Kolumny (C)</th>
+            <th class="num">Rzędy (R)</th>
+            <th class="num">Podesty</th>
+            <th class="num">Nóżki</th>
+            <th class="num">Łącz. krótkie</th>
+            <th class="num">Łącz. długie</th>
+            <th class="num">Klamry</th>
+          </tr>
+        </thead>
+        <tbody id="breakdownBody"></tbody>
+      </table>
+    </div>
+
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--blue)"></i>nóżki (róg każdego podestu)</span>
+      <span><i class="swatch" style="background:#c9cbce"></i>łączniki blatów</span>
+      <span><i class="swatch" style="background:var(--red)"></i>klamry (obrzeże, nóżka–nóżka)</span>
+    </div>
+
+    <div class="preview-wrap">
+      <svg id="preview" width="100%"></svg>
+      <p class="preview-note" id="previewNote"></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Zasada łączenia: krótsza krawędź podestu (1 m) — 1 łącznik. Dłuższa krawędź (2 m) — 2 łączniki. Na zewnętrznym obrzeżu każdej sekcji (w tym na krawędziach wzdłuż przerw między sekcjami), w punktach styku nóżek sąsiednich podestów, dokładana jest dodatkowo 1 klamra na każdy taki punkt. Sekcje oddzielone przerwą nie dzielą między sobą żadnych łączników ani klamer — każda liczona jest jako osobny, samodzielny blok. </br> Zaprojektowano przez Michał Zimnowodzki
+</footer>
+
+<script>
+let sectionCounter = 0;
+const sectionsEl = document.getElementById('sections');
+const stockInput = document.getElementById('stock');
+const statusBox = document.getElementById('status');
+
+function fmt(n){ return n.toLocaleString('pl-PL'); }
+
+function createSection(defaults){
+  sectionCounter++;
+  const id = sectionCounter;
+  const wrap = document.createElement('div');
+  wrap.className = 'section-card';
+  wrap.dataset.id = id;
+  wrap.innerHTML = `
+    <div class="section-head">
+      <input type="text" class="s-name" value="${defaults.name || ('Sekcja ' + id)}">
+      <button class="remove-btn" title="Usuń sekcję">✕</button>
+    </div>
+    <div class="mode-toggle">
+      <button type="button" class="mode-m active" data-mode="meters">Metry</button>
+      <button type="button" class="mode-u" data-mode="units">Sztuki</button>
+    </div>
+    <div class="fields-meters">
+      <div class="row2">
+        <div>
+          <label>Wymiar A (m)</label>
+          <input type="number" class="s-dimA" value="${defaults.dimA ?? 12}" min="1" step="1">
+        </div>
+        <div>
+          <label>Wymiar B (m)</label>
+          <input type="number" class="s-dimB" value="${defaults.dimB ?? 10}" min="1" step="1">
+        </div>
+      </div>
+      <label>Który wymiar to bok 2 m podestu?</label>
+      <div class="toggle-row">
+        <button type="button" class="orient-a active">Wymiar A</button>
+        <button type="button" class="orient-b">Wymiar B</button>
+      </div>
+      <p class="hint">Podest ma bok 2 m (2 łączniki) i bok 1 m (1 łącznik).</p>
+    </div>
+    <div class="fields-units" style="display:none;">
+      <div class="row2">
+        <div>
+          <label>Podesty w szerokości (szt.)</label>
+          <input type="number" class="s-colsC" value="${defaults.C ?? 6}" min="1" step="1">
+        </div>
+        <div>
+          <label>Podesty w głębokości (szt.)</label>
+          <input type="number" class="s-rowsR" value="${defaults.R ?? 10}" min="1" step="1">
+        </div>
+      </div>
+      <p class="hint">Podajesz wprost liczbę podestów obok siebie (kolumny) i jeden nad drugim (rzędy) — bez przeliczania na metry.</p>
+    </div>
+    <div class="section-mini-result"></div>
+    <div class="section-error" style="display:none;"></div>
+  `;
+  sectionsEl.appendChild(wrap);
+
+  const modeM = wrap.querySelector('.mode-m');
+  const modeU = wrap.querySelector('.mode-u');
+  const fieldsMeters = wrap.querySelector('.fields-meters');
+  const fieldsUnits = wrap.querySelector('.fields-units');
+  const orientA = wrap.querySelector('.orient-a');
+  const orientB = wrap.querySelector('.orient-b');
+
+  modeM.addEventListener('click', () => {
+    modeM.classList.add('active'); modeU.classList.remove('active');
+    fieldsMeters.style.display=''; fieldsUnits.style.display='none';
+    recalcAll();
+  });
+  modeU.addEventListener('click', () => {
+    modeU.classList.add('active'); modeM.classList.remove('active');
+    fieldsUnits.style.display=''; fieldsMeters.style.display='none';
+    recalcAll();
+  });
+  orientA.addEventListener('click', () => {
+    orientA.classList.add('active'); orientB.classList.remove('active');
+    recalcAll();
+  });
+  orientB.addEventListener('click', () => {
+    orientB.classList.add('active'); orientA.classList.remove('active');
+    recalcAll();
+  });
+
+  wrap.querySelectorAll('input').forEach(inp => inp.addEventListener('input', recalcAll));
+  wrap.querySelector('.remove-btn').addEventListener('click', () => {
+    wrap.remove();
+    recalcAll();
+  });
+
+  return wrap;
+}
+
+document.getElementById('addSection').addEventListener('click', () => {
+  createSection({ name: 'Sekcja ' + (sectionCounter+1), dimA: 4, dimB: 2 });
+  recalcAll();
+});
+
+function readSection(wrap){
+  const name = wrap.querySelector('.s-name').value || 'Sekcja';
+  const isUnits = wrap.querySelector('.mode-u').classList.contains('active');
+  let C, R, error = null;
+
+  if (isUnits){
+    C = parseFloat(wrap.querySelector('.s-colsC').value);
+    R = parseFloat(wrap.querySelector('.s-rowsR').value);
+    if (!(C>0) || !(R>0) || C%1!==0 || R%1!==0){
+      error = 'Liczba podestów w szerokości i głębokości musi być dodatnią liczbą całkowitą.';
+    }
+  } else {
+    const a = parseFloat(wrap.querySelector('.s-dimA').value);
+    const b = parseFloat(wrap.querySelector('.s-dimB').value);
+    const orientAActive = wrap.querySelector('.orient-a').classList.contains('active');
+    const dim2 = orientAActive ? a : b;
+    const dim1 = orientAActive ? b : a;
+    if (!(a>0) || !(b>0)){
+      error = 'Podaj poprawne wymiary większe od zera.';
+    } else if (Math.abs(dim2 % 2) > 1e-9){
+      error = `Wymiar wzdłuż boku 2 m (${dim2} m) musi być parzysty — sprawdź orientację.`;
+    } else if (Math.abs(dim1 % 1) > 1e-9){
+      error = `Wymiar wzdłuż boku 1 m (${dim1} m) musi być całkowitą liczbą metrów.`;
+    } else {
+      C = dim2/2;
+      R = dim1/1;
+    }
+  }
+
+  const errEl = wrap.querySelector('.section-error');
+  const miniEl = wrap.querySelector('.section-mini-result');
+  if (error){
+    errEl.style.display = ''; errEl.textContent = error;
+    miniEl.innerHTML = '';
+    return { name, error };
+  }
+  errEl.style.display = 'none';
+
+  const N = C*R;
+  const legs = 4*N;
+  const connShort = (C-1)*R;
+  const connLong = 2*C*(R-1);
+  const connTotal = connShort+connLong;
+  const clamps = 2*(C-1)+2*(R-1);
+
+  miniEl.innerHTML = `<span>C×R: <b>${C}×${R}</b></span><span>Podesty: <b>${fmt(N)}</b></span><span>Nóżki: <b>${fmt(legs)}</b></span><span>Łączniki: <b>${fmt(connTotal)}</b></span><span>Klamry: <b>${fmt(clamps)}</b></span>`;
+
+  return { name, C, R, N, legs, connShort, connLong, connTotal, clamps, error: null };
+}
+
+function recalcAll(){
+  const stock = parseFloat(stockInput.value) || 0;
+  const wraps = Array.from(sectionsEl.querySelectorAll('.section-card'));
+  const results = wraps.map(readSection);
+
+  const valid = results.filter(r => !r.error);
+  const hasError = results.some(r => r.error);
+
+  const totals = valid.reduce((acc, r) => {
+    acc.N += r.N; acc.legs += r.legs; acc.connShort += r.connShort;
+    acc.connLong += r.connLong; acc.connTotal += r.connTotal; acc.clamps += r.clamps;
+    return acc;
+  }, {N:0, legs:0, connShort:0, connLong:0, connTotal:0, clamps:0});
+
+  document.getElementById('outN').textContent = fmt(totals.N);
+  document.getElementById('outLegs').textContent = fmt(totals.legs);
+  document.getElementById('outConnTotal').textContent = fmt(totals.connTotal);
+  document.getElementById('outClamps').textContent = fmt(totals.clamps);
+
+  const body = document.getElementById('breakdownBody');
+  body.innerHTML = valid.map(r => `
+    <tr>
+      <td>${r.name}</td>
+      <td class="num">${r.C}</td>
+      <td class="num">${r.R}</td>
+      <td class="num">${fmt(r.N)}</td>
+      <td class="num">${fmt(r.legs)}</td>
+      <td class="num">${fmt(r.connShort)}</td>
+      <td class="num">${fmt(r.connLong)}</td>
+      <td class="num">${fmt(r.clamps)}</td>
+    </tr>
+  `).join('') + (valid.length > 1 ? `
+    <tr class="total">
+      <td>Razem</td>
+      <td class="num">—</td>
+      <td class="num">—</td>
+      <td class="num">${fmt(totals.N)}</td>
+      <td class="num">${fmt(totals.legs)}</td>
+      <td class="num">${fmt(totals.connShort)}</td>
+      <td class="num">${fmt(totals.connLong)}</td>
+      <td class="num">${fmt(totals.clamps)}</td>
+    </tr>` : '');
+
+  if (hasError){
+    statusBox.className = 'status err';
+    statusBox.textContent = 'Popraw błędy w sekcjach oznaczonych na czerwono poniżej.';
+  } else if (totals.N > stock){
+    statusBox.className = 'status bad';
+    statusBox.textContent = `Brakuje ${fmt(totals.N-stock)} podestów (potrzeba ${fmt(totals.N)}, magazyn ma ${fmt(stock)}).`;
+  } else {
+    statusBox.className = 'status ok';
+    statusBox.textContent = `Wystarczy podestów — zostanie ${fmt(stock-totals.N)} szt. w rezerwie.`;
+  }
+
+  drawPreview(valid);
+}
+
+function drawPreview(sections){
+  const svg = document.getElementById('preview');
+  const noteEl = document.getElementById('previewNote');
+  const NS = 'http://www.w3.org/2000/svg';
+
+  if (sections.length === 0){
+    svg.setAttribute('viewBox','0 0 100 40');
+    svg.innerHTML = '';
+    noteEl.textContent = 'Brak poprawnych sekcji do podglądu.';
+    return;
+  }
+
+  const MAXCELLS = 260;
+  const tooBig = sections.some(s => s.C*s.R > MAXCELLS) || sections.reduce((a,s)=>a+s.C*s.R,0) > MAXCELLS*2;
+  if (tooBig){
+    svg.setAttribute('viewBox','0 0 100 40');
+    svg.innerHTML = '';
+    noteEl.textContent = 'Konfiguracja zbyt duża do podglądu graficznego — obliczenia powyżej są nadal poprawne.';
+    return;
+  }
+
+  const cellW = 46, cellH = 26, gapBetween = 50, marginX = 20, marginY = 34;
+  const legColor = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim();
+  const clampColor = getComputedStyle(document.documentElement).getPropertyValue('--red').trim();
+  const connColor = '#c9cbce';
+
+  let curX = marginX;
+  const maxRows = Math.max(...sections.map(s=>s.R));
+  const H = marginY + maxRows*cellH + marginY;
+
+  const g = document.createElementNS(NS,'g');
+
+  function rect(x,y,w,h,fill,stroke){
+    const r = document.createElementNS(NS,'rect');
+    r.setAttribute('x',x); r.setAttribute('y',y);
+    r.setAttribute('width',w); r.setAttribute('height',h);
+    r.setAttribute('fill',fill);
+    if(stroke) r.setAttribute('stroke',stroke);
+    return r;
+  }
+  function line(x1,y1,x2,y2,stroke,width){
+    const l = document.createElementNS(NS,'line');
+    l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+    l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+    l.setAttribute('stroke',stroke);
+    l.setAttribute('stroke-width',width);
+    l.setAttribute('stroke-linecap','round');
+    return l;
+  }
+  function sq(cx,cy,s,fill){
+    const r = document.createElementNS(NS,'rect');
+    r.setAttribute('x',cx-s/2); r.setAttribute('y',cy-s/2);
+    r.setAttribute('width',s); r.setAttribute('height',s);
+    r.setAttribute('fill',fill);
+    r.setAttribute('rx',1);
+    return r;
+  }
+  function text(x,y,str){
+    const t = document.createElementNS(NS,'text');
+    t.setAttribute('x',x); t.setAttribute('y',y);
+    t.setAttribute('font-size','10');
+    t.setAttribute('font-family','IBM Plex Mono, monospace');
+    t.setAttribute('fill','#9a9da3');
+    t.textContent = str;
+    return t;
+  }
+
+  sections.forEach(s => {
+    const C = s.C, R = s.R;
+    const blockY = marginY;
+    g.appendChild(text(curX, blockY-14, `${s.name} (${C}×${R})`));
+
+    for (let c=0;c<C;c++){
+      for (let r=0;r<R;r++){
+        const x = curX + c*cellW, y = blockY + r*cellH;
+        g.appendChild(rect(x,y,cellW,cellH,'#2a2d31','#3a3d42'));
+      }
+    }
+    const legSize = 6, legInset = 6;
+    for (let c=0;c<C;c++){
+      for (let r=0;r<R;r++){
+        const x0 = curX + c*cellW, y0 = blockY + r*cellH;
+        const pts = [
+          [x0+legInset, y0+legInset],[x0+cellW-legInset, y0+legInset],
+          [x0+legInset, y0+cellH-legInset],[x0+cellW-legInset, y0+cellH-legInset],
+        ];
+        pts.forEach(([px,py]) => g.appendChild(sq(px,py,legSize,legColor)));
+      }
+    }
+    for (let c=0;c<C-1;c++){
+      for (let r=0;r<R;r++){
+        const x = curX + (c+1)*cellW, y = blockY + r*cellH + cellH/2;
+        g.appendChild(line(x-5,y,x+5,y,connColor,3));
+      }
+    }
+    for (let c=0;c<C;c++){
+      for (let r=0;r<R-1;r++){
+        const y = blockY + (r+1)*cellH;
+        const x1 = curX + c*cellW + cellW*0.33, x2 = curX + c*cellW + cellW*0.67;
+        g.appendChild(line(x1,y-5,x1,y+5,connColor,3));
+        g.appendChild(line(x2,y-5,x2,y+5,connColor,3));
+      }
+    }
+    for (let c=0;c<C-1;c++){
+      const x = curX + (c+1)*cellW;
+      g.appendChild(line(x-7, blockY, x+7, blockY, clampColor, 3));
+      g.appendChild(line(x-7, blockY+R*cellH, x+7, blockY+R*cellH, clampColor, 3));
+    }
+    for (let r=0;r<R-1;r++){
+      const y = blockY + (r+1)*cellH;
+      g.appendChild(line(curX, y-7, curX, y+7, clampColor, 3));
+      g.appendChild(line(curX+C*cellW, y-7, curX+C*cellW, y+7, clampColor, 3));
+    }
+
+    curX += C*cellW + gapBetween;
+  });
+
+  const W = curX - gapBetween + marginX;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = '';
+  svg.appendChild(g);
+
+  const totalN = sections.reduce((a,s)=>a+s.C*s.R,0);
+  noteEl.textContent = sections.length > 1
+    ? `Podgląd: ${sections.length} sekcje, ${totalN} podestów łącznie. Przerwa między blokami oznacza brak wspólnych łączników i klamer.`
+    : `Podgląd siatki: ${sections[0].C} kolumn × ${sections[0].R} rzędów = ${sections[0].C*sections[0].R} podestów.`;
+}
+
+createSection({ name:'Sekcja 1', dimA:12, dimB:10 });
+recalcAll();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
