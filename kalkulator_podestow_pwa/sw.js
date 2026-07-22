@@ -1,4 +1,4 @@
-const CACHE_NAME = "podesty-cache-v1";
+const CACHE_NAME = "podesty-cache-v2";
 const ASSETS = [
   "./",
   "./index.html",
