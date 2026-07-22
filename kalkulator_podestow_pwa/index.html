@@ -31,6 +31,7 @@
     --red:#E4483A;
     --red-dim:#7a2620;
     --blue:#4FA8D8;
+    --green:#5FBF7A;
     --ok:#7BC67E;
     --font-display:'Oswald', sans-serif;
     --font-body:'Inter', sans-serif;
@@ -53,7 +54,7 @@
   }
   header{
     padding:38px 24px 24px;
-    max-width:1220px;
+    max-width:1260px;
     margin:0 auto;
     border-bottom:1px solid var(--line);
   }
@@ -75,20 +76,20 @@
   }
   .sub{
     color:var(--text-dim);
-    max-width:680px;
+    max-width:700px;
     font-size:15px;
     margin:0;
   }
   main{
-    max-width:1220px;
+    max-width:1260px;
     margin:0 auto;
     padding:32px 24px 0;
     display:grid;
-    grid-template-columns:360px 1fr;
+    grid-template-columns:400px 1fr;
     gap:24px;
     align-items:start;
   }
-  @media (max-width:900px){
+  @media (max-width:960px){
     main{grid-template-columns:1fr;}
   }
   .panel{
@@ -136,10 +137,6 @@
   input:focus, select:focus{
     outline:none;
     border-color:var(--amber);
-  }
-  select{
-    font-family:var(--font-body);
-    font-size:13px;
   }
   .hint{
     font-size:11px;
@@ -239,7 +236,7 @@
     color:var(--blue);
     background:#132531;
   }
-  .fields-meters, .fields-units{margin-top:4px;}
+  .fields-meters, .fields-units, .fields-custom{margin-top:4px;}
   .section-mini-result{
     margin-top:10px;
     padding-top:10px;
@@ -253,6 +250,43 @@
   }
   .section-mini-result b{color:var(--text); font-weight:600;}
   .section-error{color:#ff8f85; font-size:11.5px; margin-top:8px; font-family:var(--font-mono);}
+
+  .preset-row, .transform-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:10px;
+  }
+  .preset-row button, .transform-row button{
+    background:var(--panel-3);
+    border:1px solid var(--line-strong);
+    color:var(--text-dim);
+    font-size:11px;
+    padding:6px 9px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .preset-row button:hover, .transform-row button:hover{border-color:var(--amber); color:var(--amber);}
+  .transform-row button{color:var(--blue); border-color:#2a4a5c;}
+  .transform-row button:hover{border-color:var(--blue); background:#132531;}
+
+  .grid-editor{
+    display:inline-grid;
+    gap:2px;
+    margin-top:12px;
+    padding:8px;
+    background:var(--panel-3);
+    border:1px solid var(--line);
+    border-radius:3px;
+  }
+  .grid-cell{
+    background:#33363b;
+    border:1px solid #46494f;
+    border-radius:2px;
+    cursor:pointer;
+  }
+  .grid-cell.on{background:var(--blue); border-color:#6cbde3;}
+  .grid-cell:hover{outline:1px solid var(--amber);}
 
   .add-btn{
     width:100%;
@@ -352,7 +386,7 @@
     margin-top:10px;
   }
   footer{
-    max-width:1220px;
+    max-width:1260px;
     margin:30px auto 0;
     padding:0 24px;
     color:var(--text-mute);
@@ -365,7 +399,7 @@
 <header>
   <p class="eyebrow">Rider techniczny / konstrukcja podestów</p>
   <h1>Kalkulator podestów scenicznych</h1>
-  <p class="sub">Podaj sekcje sceny zbudowane z podestów 2 m × 1 m — w metrach albo od razu w sztukach po szerokości i głębokości. Dodaj kilka sekcji, jeśli między blokami podestów mają być przerwy (np. przejście) — każda sekcja liczona jest niezależnie.</p>
+  <p class="sub">Podaj sekcje sceny zbudowane z podestów 2 m × 1 m — w metrach, w sztukach, albo w trybie niestandardowym, gdzie klikając w siatkę tworzysz dowolny kształt (L, T, U, z otworem w środku), z obrotem o 90° i odbiciem lustrzanym.</p>
 </header>
 
 <main>
@@ -403,7 +437,7 @@
       <div class="card clamps">
         <div class="label">Klamry</div>
         <div class="value" id="outClamps">0</div>
-        <div class="formula">tylko na obrzeżu</div>
+        <div class="formula">tylko na obrzeżu / przy otworach</div>
       </div>
     </div>
 
@@ -412,8 +446,7 @@
         <thead>
           <tr>
             <th>Sekcja</th>
-            <th class="num">Kolumny (C)</th>
-            <th class="num">Rzędy (R)</th>
+            <th class="num">Wymiar C×R</th>
             <th class="num">Podesty</th>
             <th class="num">Nóżki</th>
             <th class="num">Łącz. krótkie</th>
@@ -428,7 +461,7 @@
     <div class="legend">
       <span><i class="swatch" style="background:var(--blue)"></i>nóżki (róg każdego podestu)</span>
       <span><i class="swatch" style="background:#c9cbce"></i>łączniki blatów</span>
-      <span><i class="swatch" style="background:var(--red)"></i>klamry (obrzeże, nóżka–nóżka)</span>
+      <span><i class="swatch" style="background:var(--red)"></i>klamry (obrzeże / krawędzie otworów)</span>
     </div>
 
     <div class="preview-wrap">
@@ -439,7 +472,7 @@
 </main>
 
 <footer>
-  Zasada łączenia: krótsza krawędź podestu (1 m) — 1 łącznik. Dłuższa krawędź (2 m) — 2 łączniki. Na zewnętrznym obrzeżu każdej sekcji (w tym na krawędziach wzdłuż przerw między sekcjami), w punktach styku nóżek sąsiednich podestów, dokładana jest dodatkowo 1 klamra na każdy taki punkt. Sekcje oddzielone przerwą nie dzielą między sobą żadnych łączników ani klamer — każda liczona jest jako osobny, samodzielny blok. </br> Zaprojektowano przez Michał Zimnowodzki
+  Zasada łączenia: krótsza krawędź podestu (1 m) — 1 łącznik. Dłuższa krawędź (2 m) — 2 łączniki. Na każdej zewnętrznej krawędzi konstrukcji — w tym na obrzeżu przerw między sekcjami oraz na krawędziach otworów wewnątrz sceny w trybie niestandardowym — w punktach styku nóżek sąsiednich podestów dokładana jest dodatkowo 1 klamra na każdy taki punkt.
 </footer>
 
 <script>
@@ -450,20 +483,101 @@ const statusBox = document.getElementById('status');
 
 function fmt(n){ return n.toLocaleString('pl-PL'); }
 
+// ---------- grid helpers (shared by all modes) ----------
+function makeFullGrid(R,C){ return Array.from({length:R}, () => Array(C).fill(true)); }
+
+function rotateGrid90(grid){
+  const R = grid.length, C = grid[0].length;
+  const out = Array.from({length:C}, () => Array(R).fill(false));
+  for (let r=0;r<R;r++) for (let c=0;c<C;c++) out[c][R-1-r] = grid[r][c];
+  return out;
+}
+function mirrorGridH(grid){ return grid.map(row => [...row].reverse()); }
+
+function presetFill(R,C){ return makeFullGrid(R,C); }
+function presetClear(R,C){ return Array.from({length:R}, () => Array(C).fill(false)); }
+function presetL(R,C){
+  const g = makeFullGrid(R,C);
+  const r0 = Math.max(1,Math.floor(R/2)), c0 = Math.max(1,Math.floor(C/2));
+  for (let r=r0;r<R;r++) for (let c=c0;c<C;c++) g[r][c]=false;
+  return g;
+}
+function presetT(R,C){
+  const g = makeFullGrid(R,C);
+  const topRows = Math.max(1, Math.ceil(R/3));
+  const bandStart = Math.floor(C/3), bandEnd = Math.max(bandStart+1, Math.ceil(2*C/3));
+  for (let r=topRows;r<R;r++) for (let c=0;c<C;c++) if (c<bandStart || c>=bandEnd) g[r][c]=false;
+  return g;
+}
+function presetU(R,C){
+  const g = makeFullGrid(R,C);
+  const notchDepth = Math.max(1, Math.floor(R/2));
+  const bandStart = Math.floor(C/3), bandEnd = Math.max(bandStart+1, Math.ceil(2*C/3));
+  for (let r=R-notchDepth;r<R;r++) for (let c=bandStart;c<bandEnd;c++) g[r][c]=false;
+  return g;
+}
+function presetRing(R,C){
+  const g = makeFullGrid(R,C);
+  for (let r=1;r<R-1;r++) for (let c=1;c<C-1;c++) g[r][c]=false;
+  return g;
+}
+
+// core stats/geometry extraction — used both for numeric results and preview drawing
+function analyzeGrid(grid){
+  const R = grid.length, C = grid[0].length;
+  let N=0;
+  const cells=[];
+  for (let r=0;r<R;r++) for (let c=0;c<C;c++) if (grid[r][c]){ N++; cells.push({r,c}); }
+
+  const hConn=[]; // short-edge connectors: between (r,c) and (r,c+1)
+  for (let r=0;r<R;r++) for (let c=0;c<C-1;c++) if (grid[r][c] && grid[r][c+1]) hConn.push({r,c});
+
+  const vConn=[]; // long-edge connectors: between (r,c) and (r+1,c)
+  for (let c=0;c<C;c++) for (let r=0;r<R-1;r++) if (grid[r][c] && grid[r+1][c]) vConn.push({r,c});
+
+  const clampMarks=[]; // {type:'v'|'h', r, c, side:'top'|'bottom'|'left'|'right'}
+  hConn.forEach(({r,c}) => {
+    const topOpen = (r===0) || !(grid[r-1][c] && grid[r-1][c+1]);
+    const bottomOpen = (r===R-1) || !(grid[r+1][c] && grid[r+1][c+1]);
+    if (topOpen) clampMarks.push({type:'v', r, c, side:'top'});
+    if (bottomOpen) clampMarks.push({type:'v', r, c, side:'bottom'});
+  });
+  vConn.forEach(({r,c}) => {
+    const leftOpen = (c===0) || !(grid[r][c-1] && grid[r+1][c-1]);
+    const rightOpen = (c===C-1) || !(grid[r][c+1] && grid[r+1][c+1]);
+    if (leftOpen) clampMarks.push({type:'h', r, c, side:'left'});
+    if (rightOpen) clampMarks.push({type:'h', r, c, side:'right'});
+  });
+
+  return {
+    R, C, N, cells,
+    legs: 4*N,
+    connShort: hConn.length,
+    connLong: vConn.length*2,
+    connTotal: hConn.length + vConn.length*2,
+    clamps: clampMarks.length,
+    hConn, vConn, clampMarks
+  };
+}
+
+// ---------- section creation ----------
 function createSection(defaults){
   sectionCounter++;
   const id = sectionCounter;
   const wrap = document.createElement('div');
   wrap.className = 'section-card';
   wrap.dataset.id = id;
+  wrap._grid = null;
+
   wrap.innerHTML = `
     <div class="section-head">
       <input type="text" class="s-name" value="${defaults.name || ('Sekcja ' + id)}">
       <button class="remove-btn" title="Usuń sekcję">✕</button>
     </div>
     <div class="mode-toggle">
-      <button type="button" class="mode-m active" data-mode="meters">Metry</button>
-      <button type="button" class="mode-u" data-mode="units">Sztuki</button>
+      <button type="button" class="mode-btn active" data-mode="meters">Metry</button>
+      <button type="button" class="mode-btn" data-mode="units">Sztuki</button>
+      <button type="button" class="mode-btn" data-mode="custom">Niestandardowy</button>
     </div>
     <div class="fields-meters">
       <div class="row2">
@@ -494,46 +608,127 @@ function createSection(defaults){
           <input type="number" class="s-rowsR" value="${defaults.R ?? 10}" min="1" step="1">
         </div>
       </div>
-      <p class="hint">Podajesz wprost liczbę podestów obok siebie (kolumny) i jeden nad drugim (rzędy) — bez przeliczania na metry.</p>
+      <p class="hint">Podajesz wprost liczbę podestów obok siebie (kolumny) i jeden nad drugim (rzędy).</p>
+    </div>
+    <div class="fields-custom" style="display:none;">
+      <div class="row2">
+        <div>
+          <label>Kolumny (szt.)</label>
+          <input type="number" class="s-customC" value="${defaults.customC ?? 6}" min="1" max="24" step="1">
+        </div>
+        <div>
+          <label>Rzędy (szt.)</label>
+          <input type="number" class="s-customR" value="${defaults.customR ?? 6}" min="1" max="24" step="1">
+        </div>
+      </div>
+      <p class="hint">Ustaw rozmiar siatki (max 24×24), a potem kliknij pola poniżej, żeby dodać/usunąć podest w danym miejscu — również w środku (otwór).</p>
+      <div class="preset-row">
+        <button type="button" data-preset="fill">Pełny prostokąt</button>
+        <button type="button" data-preset="L">Kształt L</button>
+        <button type="button" data-preset="T">Kształt T</button>
+        <button type="button" data-preset="U">Kształt U</button>
+        <button type="button" data-preset="ring">Pierścień (dziura)</button>
+        <button type="button" data-preset="clear">Wyczyść</button>
+      </div>
+      <div class="transform-row">
+        <button type="button" class="btn-rotate">⟳ Obróć 90°</button>
+        <button type="button" class="btn-mirror">⇋ Odbicie lustrzane</button>
+      </div>
+      <div class="grid-editor"></div>
     </div>
     <div class="section-mini-result"></div>
     <div class="section-error" style="display:none;"></div>
   `;
   sectionsEl.appendChild(wrap);
 
-  const modeM = wrap.querySelector('.mode-m');
-  const modeU = wrap.querySelector('.mode-u');
+  const modeBtns = wrap.querySelectorAll('.mode-btn');
   const fieldsMeters = wrap.querySelector('.fields-meters');
   const fieldsUnits = wrap.querySelector('.fields-units');
+  const fieldsCustom = wrap.querySelector('.fields-custom');
   const orientA = wrap.querySelector('.orient-a');
   const orientB = wrap.querySelector('.orient-b');
+  const customC = wrap.querySelector('.s-customC');
+  const customR = wrap.querySelector('.s-customR');
 
-  modeM.addEventListener('click', () => {
-    modeM.classList.add('active'); modeU.classList.remove('active');
-    fieldsMeters.style.display=''; fieldsUnits.style.display='none';
+  function showMode(mode){
+    modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode===mode));
+    fieldsMeters.style.display = mode==='meters' ? '' : 'none';
+    fieldsUnits.style.display = mode==='units' ? '' : 'none';
+    fieldsCustom.style.display = mode==='custom' ? '' : 'none';
+    if (mode==='custom' && !wrap._grid){
+      wrap._grid = presetFill(parseInt(customR.value)||6, parseInt(customC.value)||6);
+      renderGridEditor(wrap);
+    }
+    recalcAll();
+  }
+  modeBtns.forEach(b => b.addEventListener('click', () => showMode(b.dataset.mode)));
+
+  orientA.addEventListener('click', () => { orientA.classList.add('active'); orientB.classList.remove('active'); recalcAll(); });
+  orientB.addEventListener('click', () => { orientB.classList.add('active'); orientA.classList.remove('active'); recalcAll(); });
+
+  [wrap.querySelector('.s-name'), wrap.querySelector('.s-dimA'), wrap.querySelector('.s-dimB'),
+   wrap.querySelector('.s-colsC'), wrap.querySelector('.s-rowsR')].forEach(inp => inp.addEventListener('input', recalcAll));
+
+  [customC, customR].forEach(inp => inp.addEventListener('input', () => {
+    let R = Math.min(24, Math.max(1, parseInt(customR.value)||1));
+    let C = Math.min(24, Math.max(1, parseInt(customC.value)||1));
+    wrap._grid = presetFill(R,C);
+    renderGridEditor(wrap);
+    recalcAll();
+  }));
+
+  wrap.querySelectorAll('.preset-row button').forEach(btn => btn.addEventListener('click', () => {
+    const R = wrap._grid ? wrap._grid.length : (parseInt(customR.value)||6);
+    const C = wrap._grid ? wrap._grid[0].length : (parseInt(customC.value)||6);
+    const presets = {fill:presetFill, L:presetL, T:presetT, U:presetU, ring:presetRing, clear:presetClear};
+    wrap._grid = presets[btn.dataset.preset](R,C);
+    renderGridEditor(wrap);
+    recalcAll();
+  }));
+
+  wrap.querySelector('.btn-rotate').addEventListener('click', () => {
+    wrap._grid = rotateGrid90(wrap._grid);
+    customR.value = wrap._grid.length;
+    customC.value = wrap._grid[0].length;
+    renderGridEditor(wrap);
     recalcAll();
   });
-  modeU.addEventListener('click', () => {
-    modeU.classList.add('active'); modeM.classList.remove('active');
-    fieldsUnits.style.display=''; fieldsMeters.style.display='none';
-    recalcAll();
-  });
-  orientA.addEventListener('click', () => {
-    orientA.classList.add('active'); orientB.classList.remove('active');
-    recalcAll();
-  });
-  orientB.addEventListener('click', () => {
-    orientB.classList.add('active'); orientA.classList.remove('active');
+  wrap.querySelector('.btn-mirror').addEventListener('click', () => {
+    wrap._grid = mirrorGridH(wrap._grid);
+    renderGridEditor(wrap);
     recalcAll();
   });
 
-  wrap.querySelectorAll('input').forEach(inp => inp.addEventListener('input', recalcAll));
-  wrap.querySelector('.remove-btn').addEventListener('click', () => {
-    wrap.remove();
-    recalcAll();
-  });
+  wrap.querySelector('.remove-btn').addEventListener('click', () => { wrap.remove(); recalcAll(); });
+
+  if (defaults.customGrid){
+    wrap._grid = defaults.customGrid;
+  }
 
   return wrap;
+}
+
+function renderGridEditor(wrap){
+  const editor = wrap.querySelector('.grid-editor');
+  const grid = wrap._grid;
+  const R = grid.length, C = grid[0].length;
+  const cellSize = Math.max(10, Math.min(24, Math.floor(300/C)));
+  editor.style.gridTemplateColumns = `repeat(${C}, ${cellSize}px)`;
+  editor.innerHTML = '';
+  for (let r=0;r<R;r++){
+    for (let c=0;c<C;c++){
+      const cell = document.createElement('div');
+      cell.className = 'grid-cell' + (grid[r][c] ? ' on' : '');
+      cell.style.width = cellSize+'px';
+      cell.style.height = cellSize+'px';
+      cell.addEventListener('click', () => {
+        wrap._grid[r][c] = !wrap._grid[r][c];
+        cell.classList.toggle('on');
+        recalcAll();
+      });
+      editor.appendChild(cell);
+    }
+  }
 }
 
 document.getElementById('addSection').addEventListener('click', () => {
@@ -543,14 +738,23 @@ document.getElementById('addSection').addEventListener('click', () => {
 
 function readSection(wrap){
   const name = wrap.querySelector('.s-name').value || 'Sekcja';
-  const isUnits = wrap.querySelector('.mode-u').classList.contains('active');
-  let C, R, error = null;
+  const mode = wrap.querySelector('.mode-btn.active').dataset.mode;
+  let grid, error = null;
 
-  if (isUnits){
-    C = parseFloat(wrap.querySelector('.s-colsC').value);
-    R = parseFloat(wrap.querySelector('.s-rowsR').value);
+  if (mode === 'custom'){
+    grid = wrap._grid;
+    if (!grid){ error = 'Siatka nie została zainicjowana.'; }
+    else {
+      const anyOn = grid.some(row => row.some(v=>v));
+      if (!anyOn) error = 'Siatka jest pusta — zaznacz przynajmniej jeden podest.';
+    }
+  } else if (mode === 'units'){
+    const C = parseFloat(wrap.querySelector('.s-colsC').value);
+    const R = parseFloat(wrap.querySelector('.s-rowsR').value);
     if (!(C>0) || !(R>0) || C%1!==0 || R%1!==0){
       error = 'Liczba podestów w szerokości i głębokości musi być dodatnią liczbą całkowitą.';
+    } else {
+      grid = makeFullGrid(R,C);
     }
   } else {
     const a = parseFloat(wrap.querySelector('.s-dimA').value);
@@ -565,8 +769,7 @@ function readSection(wrap){
     } else if (Math.abs(dim1 % 1) > 1e-9){
       error = `Wymiar wzdłuż boku 1 m (${dim1} m) musi być całkowitą liczbą metrów.`;
     } else {
-      C = dim2/2;
-      R = dim1/1;
+      grid = makeFullGrid(dim1/1, dim2/2);
     }
   }
 
@@ -579,16 +782,10 @@ function readSection(wrap){
   }
   errEl.style.display = 'none';
 
-  const N = C*R;
-  const legs = 4*N;
-  const connShort = (C-1)*R;
-  const connLong = 2*C*(R-1);
-  const connTotal = connShort+connLong;
-  const clamps = 2*(C-1)+2*(R-1);
+  const stats = analyzeGrid(grid);
+  miniEl.innerHTML = `<span>C×R: <b>${stats.C}×${stats.R}</b></span><span>Podesty: <b>${fmt(stats.N)}</b></span><span>Nóżki: <b>${fmt(stats.legs)}</b></span><span>Łączniki: <b>${fmt(stats.connTotal)}</b></span><span>Klamry: <b>${fmt(stats.clamps)}</b></span>`;
 
-  miniEl.innerHTML = `<span>C×R: <b>${C}×${R}</b></span><span>Podesty: <b>${fmt(N)}</b></span><span>Nóżki: <b>${fmt(legs)}</b></span><span>Łączniki: <b>${fmt(connTotal)}</b></span><span>Klamry: <b>${fmt(clamps)}</b></span>`;
-
-  return { name, C, R, N, legs, connShort, connLong, connTotal, clamps, error: null };
+  return { name, grid, ...stats, error: null };
 }
 
 function recalcAll(){
@@ -614,8 +811,7 @@ function recalcAll(){
   body.innerHTML = valid.map(r => `
     <tr>
       <td>${r.name}</td>
-      <td class="num">${r.C}</td>
-      <td class="num">${r.R}</td>
+      <td class="num">${r.C}×${r.R}</td>
       <td class="num">${fmt(r.N)}</td>
       <td class="num">${fmt(r.legs)}</td>
       <td class="num">${fmt(r.connShort)}</td>
@@ -625,7 +821,6 @@ function recalcAll(){
   `).join('') + (valid.length > 1 ? `
     <tr class="total">
       <td>Razem</td>
-      <td class="num">—</td>
       <td class="num">—</td>
       <td class="num">${fmt(totals.N)}</td>
       <td class="num">${fmt(totals.legs)}</td>
@@ -660,19 +855,19 @@ function drawPreview(sections){
     return;
   }
 
-  const MAXCELLS = 260;
-  const tooBig = sections.some(s => s.C*s.R > MAXCELLS) || sections.reduce((a,s)=>a+s.C*s.R,0) > MAXCELLS*2;
-  if (tooBig){
+  const totalCells = sections.reduce((a,s)=>a+s.C*s.R,0);
+  if (totalCells > 500){
     svg.setAttribute('viewBox','0 0 100 40');
     svg.innerHTML = '';
     noteEl.textContent = 'Konfiguracja zbyt duża do podglądu graficznego — obliczenia powyżej są nadal poprawne.';
     return;
   }
 
-  const cellW = 46, cellH = 26, gapBetween = 50, marginX = 20, marginY = 34;
+  const cellW = 32, cellH = 20, gapBetween = 44, marginX = 20, marginY = 30;
   const legColor = getComputedStyle(document.documentElement).getPropertyValue('--blue').trim();
   const clampColor = getComputedStyle(document.documentElement).getPropertyValue('--red').trim();
   const connColor = '#c9cbce';
+  const emptyColor = '#1a1c1f';
 
   let curX = marginX;
   const maxRows = Math.max(...sections.map(s=>s.R));
@@ -716,51 +911,50 @@ function drawPreview(sections){
   }
 
   sections.forEach(s => {
-    const C = s.C, R = s.R;
+    const C = s.C, R = s.R, grid = s.grid;
     const blockY = marginY;
-    g.appendChild(text(curX, blockY-14, `${s.name} (${C}×${R})`));
+    g.appendChild(text(curX, blockY-12, `${s.name} (${s.N} szt.)`));
 
-    for (let c=0;c<C;c++){
-      for (let r=0;r<R;r++){
+    for (let r=0;r<R;r++){
+      for (let c=0;c<C;c++){
         const x = curX + c*cellW, y = blockY + r*cellH;
-        g.appendChild(rect(x,y,cellW,cellH,'#2a2d31','#3a3d42'));
+        if (grid[r][c]){
+          g.appendChild(rect(x,y,cellW,cellH,'#2a2d31','#3a3d42'));
+        }
       }
     }
-    const legSize = 6, legInset = 6;
-    for (let c=0;c<C;c++){
-      for (let r=0;r<R;r++){
-        const x0 = curX + c*cellW, y0 = blockY + r*cellH;
-        const pts = [
-          [x0+legInset, y0+legInset],[x0+cellW-legInset, y0+legInset],
-          [x0+legInset, y0+cellH-legInset],[x0+cellW-legInset, y0+cellH-legInset],
-        ];
-        pts.forEach(([px,py]) => g.appendChild(sq(px,py,legSize,legColor)));
-      }
-    }
-    for (let c=0;c<C-1;c++){
-      for (let r=0;r<R;r++){
-        const x = curX + (c+1)*cellW, y = blockY + r*cellH + cellH/2;
-        g.appendChild(line(x-5,y,x+5,y,connColor,3));
-      }
-    }
-    for (let c=0;c<C;c++){
-      for (let r=0;r<R-1;r++){
-        const y = blockY + (r+1)*cellH;
-        const x1 = curX + c*cellW + cellW*0.33, x2 = curX + c*cellW + cellW*0.67;
-        g.appendChild(line(x1,y-5,x1,y+5,connColor,3));
-        g.appendChild(line(x2,y-5,x2,y+5,connColor,3));
-      }
-    }
-    for (let c=0;c<C-1;c++){
-      const x = curX + (c+1)*cellW;
-      g.appendChild(line(x-7, blockY, x+7, blockY, clampColor, 3));
-      g.appendChild(line(x-7, blockY+R*cellH, x+7, blockY+R*cellH, clampColor, 3));
-    }
-    for (let r=0;r<R-1;r++){
+    const legSize = 5, legInset = 5;
+    s.cells.forEach(({r,c}) => {
+      const x0 = curX + c*cellW, y0 = blockY + r*cellH;
+      const pts = [
+        [x0+legInset, y0+legInset],[x0+cellW-legInset, y0+legInset],
+        [x0+legInset, y0+cellH-legInset],[x0+cellW-legInset, y0+cellH-legInset],
+      ];
+      pts.forEach(([px,py]) => g.appendChild(sq(px,py,legSize,legColor)));
+    });
+
+    s.hConn.forEach(({r,c}) => {
+      const x = curX + (c+1)*cellW, y = blockY + r*cellH + cellH/2;
+      g.appendChild(line(x-4,y,x+4,y,connColor,2.5));
+    });
+    s.vConn.forEach(({r,c}) => {
       const y = blockY + (r+1)*cellH;
-      g.appendChild(line(curX, y-7, curX, y+7, clampColor, 3));
-      g.appendChild(line(curX+C*cellW, y-7, curX+C*cellW, y+7, clampColor, 3));
-    }
+      const x1 = curX + c*cellW + cellW*0.33, x2 = curX + c*cellW + cellW*0.67;
+      g.appendChild(line(x1,y-4,x1,y+4,connColor,2.5));
+      g.appendChild(line(x2,y-4,x2,y+4,connColor,2.5));
+    });
+
+    s.clampMarks.forEach(mark => {
+      if (mark.type==='v'){
+        const x = curX + (mark.c+1)*cellW;
+        const y = mark.side==='top' ? blockY + mark.r*cellH : blockY + (mark.r+1)*cellH;
+        g.appendChild(line(x-6, y, x+6, y, clampColor, 2.5));
+      } else {
+        const y = blockY + (mark.r+1)*cellH;
+        const x = mark.side==='left' ? curX + mark.c*cellW : curX + (mark.c+1)*cellW;
+        g.appendChild(line(x, y-6, x, y+6, clampColor, 2.5));
+      }
+    });
 
     curX += C*cellW + gapBetween;
   });
@@ -770,10 +964,9 @@ function drawPreview(sections){
   svg.innerHTML = '';
   svg.appendChild(g);
 
-  const totalN = sections.reduce((a,s)=>a+s.C*s.R,0);
   noteEl.textContent = sections.length > 1
-    ? `Podgląd: ${sections.length} sekcje, ${totalN} podestów łącznie. Przerwa między blokami oznacza brak wspólnych łączników i klamer.`
-    : `Podgląd siatki: ${sections[0].C} kolumn × ${sections[0].R} rzędów = ${sections[0].C*sections[0].R} podestów.`;
+    ? `Podgląd: ${sections.length} sekcje, ${totalCells>0?sections.reduce((a,s)=>a+s.N,0):0} podestów łącznie.`
+    : `Podgląd: ${sections[0].N} podestów w siatce ${sections[0].C}×${sections[0].R}.`;
 }
 
 createSection({ name:'Sekcja 1', dimA:12, dimB:10 });
